@@ -1,0 +1,30 @@
+# Cargo.toml 是 Rust 的项目配置文件
+# 类似于 Python 的 requirements.txt 或 Go 的 go.mod
+
+[package]
+name = "systemd-generator"
+version = "0.1.0"
+edition = "2021"
+authors = ["waitfish <daiwj2024@outlook.com>"]
+description = "A simple CLI tool to generate systemd service files quickly"
+license = "MIT"
+repository = "https://github.com/waitfish/systemd-generator"
+homepage = "https://github.com/waitfish/systemd-generator"
+documentation = "https://github.com/waitfish/systemd-generator#readme"
+readme = "README.md"
+keywords = ["systemd", "service", "linux", "cli", "generator"]
+categories = ["command-line-utilities", "development-tools"]
+
+# 依赖包（类似 Python 的 pip install 或 Go 的 go get）
+[dependencies]
+# clap: 命令行参数解析库（类似 Python 的 argparse）
+# derive 特性让我们可以用宏自动实现功能
+clap = { version = "4.4", features = ["derive"] }
+
+# Release 构建优化配置
+[profile.release]
+strip = true       # 自动去掉符号表
+opt-level = "z"    # 优化体积（"z" 最小体积，"3" 最快速度）
+lto = true         # 链接时优化
+codegen-units = 1  # 减少并行编译单元，增加优化机会
+
