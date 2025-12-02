@@ -44,7 +44,7 @@ read -p "请选择 (1-4): " choice
 case $choice in
     1)
         echo "🧪 执行测试发布..."
-        cargo publish --dry-run
+        cargo publish --registry crates-io --dry-run
         echo ""
         echo "✅ 测试完成！如果没有错误，可以执行正式发布"
         ;;
@@ -67,7 +67,7 @@ case $choice in
         
         # 发布
         echo "📤 发布中..."
-        cargo publish
+        cargo publish --registry crates-io
         
         echo ""
         echo "🎉 发布成功！"
@@ -104,7 +104,7 @@ case $choice in
         
         # 2. 发布到 crates.io
         echo "📤 发布到 crates.io..."
-        cargo publish
+        cargo publish --registry crates-io
         
         # 3. 创建 Git 标签
         if [ -d ".git" ]; then
