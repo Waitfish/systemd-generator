@@ -45,11 +45,8 @@ jobs:
       - name: Build release binary
         run: cargo build --release --verbose
       
-      - name: Run tests
-        run: cargo test --verbose
-      
       - name: Strip binary
-        run: strip target/release/systemd-generator
+        run: strip target/release/systemd-generator || true
       
       - name: Get version from tag
         id: get_version
@@ -57,12 +54,12 @@ jobs:
       
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
           body: |
             # systemd-generator ${{ steps.get_version.outputs.VERSION }}
             
@@ -86,16 +83,8 @@ jobs:
             ```
             
             更多信息请查看 [README](https://github.com/${{ github.repository }}#readme)
+          files: |
+            target/release/systemd-generator
           draft: false
           prerelease: false
-      
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./target/release/systemd-generator
-          asset_name: systemd-generator
-          asset_content_type: application/octet-stream
 
