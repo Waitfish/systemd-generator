@@ -25,18 +25,30 @@ check_version_exists() {
     local version=$1
     echo "🔍 检查 crates.io 上的版本..."
     
-    # 尝试获取包信息
+    # 方法1: 尝试 dry-run 发布来检测版本冲突
+    if cargo publish --registry crates-io --dry-run 2>&1 | grep -q "already exists"; then
+        echo "⚠️  版本 $version 已存在于 crates.io"
+        
+        # 尝试获取最新版本
+        if cargo search "$PACKAGE_NAME" --limit 1 2>/dev/null | grep -q "^$PACKAGE_NAME"; then
+            LATEST_VERSION=$(cargo search "$PACKAGE_NAME" --limit 1 | grep "^$PACKAGE_NAME" | sed 's/.*= "\(.*\)".*/\1/')
+            echo "📦 crates.io 最新版本: $LATEST_VERSION"
+        fi
+        return 0  # 版本已存在
+    fi
+    
+    # 方法2: 通过 cargo search 检查
     if cargo search "$PACKAGE_NAME" --limit 1 2>/dev/null | grep -q "^$PACKAGE_NAME"; then
-        # 包存在，获取最新版本
         LATEST_VERSION=$(cargo search "$PACKAGE_NAME" --limit 1 | grep "^$PACKAGE_NAME" | sed 's/.*= "\(.*\)".*/\1/')
         echo "📦 crates.io 最新版本: $LATEST_VERSION"
         
-        if [ "$version" = "$LATEST_VERSION" ]; then
-            return 0  # 版本已存在
+        if [ "$version" = "$LATEST_VERSION" ] || [ "$version" \< "$LATEST_VERSION" ]; then
+            return 0  # 版本已存在或更旧
         fi
     else
-        echo "ℹ️  包尚未发布到 crates.io"
+        echo "ℹ️  包尚未发布到 crates.io（或索引未更新）"
     fi
+    
     return 1  # 版本不存在
 }
 
