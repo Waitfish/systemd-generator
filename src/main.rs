@@ -55,7 +55,7 @@ struct ServiceConfig {
     name: String,
     description: String,
     exec_start: String,
-    working_directory: Option<String>,  // Option 表示可能有值或没有值（类似 Go 的指针或 Python 的 Optional）
+    working_directory: Option<String>, // Option 表示可能有值或没有值（类似 Go 的指针或 Python 的 Optional）
     user: String,
 }
 
@@ -77,7 +77,8 @@ impl ServiceConfig {
         exec_start: String,
         working_directory: Option<String>,
         user: String,
-    ) -> Self {  // Self 是当前类型的别名，这里指 ServiceConfig
+    ) -> Self {
+        // Self 是当前类型的别名，这里指 ServiceConfig
         ServiceConfig {
             name,
             description,
@@ -91,7 +92,7 @@ impl ServiceConfig {
     // 【Rust 概念 5: 借用 (&self) - Rust 最重要的概念之一】
     // ========================================================================
     // &self 表示"借用"self，不获取所有权
-    // 
+    //
     // Rust 的所有权系统（Ownership）：
     // 1. 每个值都有一个所有者
     // 2. 同一时间只能有一个所有者
@@ -116,9 +117,7 @@ impl ServiceConfig {
              Type=simple\n\
              User={}\n\
              ExecStart={}\n",
-            self.description,
-            self.user,
-            self.exec_start
+            self.description, self.user, self.exec_start
         );
 
         // ====================================================================
@@ -144,7 +143,7 @@ impl ServiceConfig {
              RestartSec=5\n\
              \n\
              [Install]\n\
-             WantedBy=multi-user.target\n"
+             WantedBy=multi-user.target\n",
         );
 
         content
@@ -188,14 +187,14 @@ impl ServiceConfig {
 
         // 打印成功消息
         println!("✅ Service 文件已生成: {}", filename);
-        println!("📋 安装步骤:");
-        println!("   1. sudo mv {} /etc/systemd/system/", filename);
-        println!("   2. sudo systemctl daemon-reload");
-        println!("   3. sudo systemctl enable {}", self.name);
-        println!("   4. sudo systemctl start {}", self.name);
-        println!("   5. sudo systemctl status {}", self.name);
+        println!("\n📋 安装步骤（可直接复制粘贴）:");
+        println!("sudo mv {} /etc/systemd/system/", filename);
+        println!("sudo systemctl daemon-reload");
+        println!("sudo systemctl enable {}", self.name);
+        println!("sudo systemctl start {}", self.name);
+        println!("sudo systemctl status {}", self.name);
 
-        Ok(())  // 返回成功
+        Ok(()) // 返回成功
     }
 }
 
@@ -253,11 +252,10 @@ fn main() -> io::Result<()> {
 // ============================================================================
 // 1. 编译项目: cargo build --release
 // 2. 运行程序: cargo run -- --name myapp --exec /usr/bin/myapp
-// 
+//
 // 或直接运行:
 // cargo run -- --name myapp --exec /usr/bin/python3 --description "我的Python服务"
 //
 // 查看帮助:
 // cargo run -- --help
 // ============================================================================
-
