@@ -1,27 +1,28 @@
-# Systemd Service 文件生成器
+# systemd-generator
 
-一个用 Rust 编写的命令行工具，快速生成 Linux systemd service 文件。
+一个简单高效的命令行工具，快速生成 Linux systemd service 配置文件。
 
-[![Crates.io](https://img.shields.io/crates/v/systemd-generator.svg)](https://crates.io/crates/systemd-generator)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE-MIT)
+[![GitHub](https://img.shields.io/badge/github-Waitfish/systemd--generator-blue)](https://github.com/Waitfish/systemd-generator)
+
+## ✨ 特性
+
+- 🚀 快速生成 systemd service 文件
+- 💻 简洁的命令行界面
+- ⚙️ 支持常用配置选项
+- 📝 自动生成安装说明
+- 🔒 验证可执行文件路径
+- 📦 单文件可执行程序，无需依赖
 
 ## 📦 安装
 
-### 方式 1: 使用 Cargo（推荐）
+### 方式 1: 下载预编译二进制文件（推荐）
 
-如果你已经安装了 Rust：
-
-```bash
-cargo install systemd-generator
-```
-
-### 方式 2: 下载预编译二进制文件
-
-从 [Releases](https://github.com/yourusername/systemd-generator/releases) 页面下载最新版本：
+从 [Releases](https://github.com/Waitfish/systemd-generator/releases) 页面下载最新版本：
 
 ```bash
-# 下载
-wget https://github.com/yourusername/systemd-generator/releases/latest/download/systemd-generator
+# 下载最新版本
+wget https://github.com/Waitfish/systemd-generator/releases/latest/download/systemd-generator
 
 # 添加执行权限
 chmod +x systemd-generator
@@ -30,194 +31,177 @@ chmod +x systemd-generator
 sudo mv systemd-generator /usr/local/bin/
 ```
 
+### 方式 2: 使用 Cargo 安装
+
+如果你已经安装了 Rust 工具链：
+
+```bash
+cargo install systemd-generator
+```
+
 ### 方式 3: 从源码编译
 
 ```bash
-git clone https://github.com/yourusername/systemd-generator.git
+git clone https://github.com/Waitfish/systemd-generator.git
 cd systemd-generator
 cargo build --release
 sudo cp target/release/systemd-generator /usr/local/bin/
 ```
 
-## 🎯 项目目标
-
-这是一个 Rust 入门学习项目，通过实现一个实用工具来学习 Rust 的核心概念：
-- ✅ 所有权 (Ownership) 和借用 (Borrowing)
-- ✅ 结构体 (Struct) 和方法 (Method)
-- ✅ 错误处理 (Result 和 Option)
-- ✅ 模式匹配 (Pattern Matching)
-- ✅ 命令行参数解析
-
-## 📦 安装 Rust 环境
-
-如果还没有安装 Rust，运行以下命令：
-
-```bash
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-source $HOME/.cargo/env
-```
-
-验证安装：
-```bash
-rustc --version
-cargo --version
-```
-
 ## 🚀 使用方法
 
-### 编译项目
+### 基本用法
 
 ```bash
-cd systemd-generator
-cargo build --release
+systemd-generator --name myapp --exec /usr/bin/python3
 ```
 
-### 运行示例
+### 完整示例
 
-#### 基本用法
 ```bash
-cargo run -- --name myapp --exec /usr/bin/python3
-```
-
-#### 完整参数
-```bash
-cargo run -- \
+systemd-generator \
   --name myapp \
-  --exec /usr/bin/python3 \
-  --description "我的Python应用" \
-  --working-dir /home/user/myapp \
-  --user myuser \
+  --exec "/usr/bin/python3 /opt/myapp/main.py" \
+  --description "我的应用服务" \
+  --working-dir /opt/myapp \
+  --user www-data \
   --output /tmp/myapp.service
 ```
 
-#### 查看帮助
+### 查看所有选项
+
 ```bash
-cargo run -- --help
+systemd-generator --help
 ```
 
-### 生成后的安装步骤
+## 📋 命令行参数
 
-工具会生成一个 `.service` 文件，然后：
+| 参数 | 简写 | 必需 | 说明 |
+|------|------|------|------|
+| `--name` | `-n` | ✅ | 服务名称 |
+| `--exec` | `-e` | ✅ | 可执行文件的完整路径 |
+| `--description` | `-d` | ❌ | 服务描述（默认："My Service"） |
+| `--working-dir` | `-w` | ❌ | 工作目录 |
+| `--user` | `-u` | ❌ | 运行用户（默认：当前用户） |
+| `--output` | `-o` | ❌ | 输出文件路径（默认：当前目录） |
+
+## 📝 使用示例
+
+### 示例 1: Python Web 应用
+
+```bash
+systemd-generator \
+  --name flask-app \
+  --exec "/usr/bin/python3 /home/user/app/app.py" \
+  --description "Flask Web Application" \
+  --working-dir /home/user/app \
+  --user www-data
+```
+
+### 示例 2: Node.js 应用
+
+```bash
+systemd-generator \
+  --name node-app \
+  --exec "/usr/bin/node /opt/app/server.js" \
+  --description "Node.js Application" \
+  --working-dir /opt/app \
+  --user nodeuser
+```
+
+### 示例 3: Go 服务
+
+```bash
+systemd-generator \
+  --name go-api \
+  --exec /opt/myservice/server \
+  --description "Go API Server" \
+  --user apiuser
+```
+
+## 🔧 安装生成的 Service 文件
+
+生成 service 文件后，按照以下步骤安装：
 
 ```bash
 # 1. 移动到 systemd 目录
 sudo mv myapp.service /etc/systemd/system/
 
-# 2. 重载 systemd
+# 2. 重载 systemd 配置
 sudo systemctl daemon-reload
 
-# 3. 启用服务（开机自启）
+# 3. 启用服务（开机自启动）
 sudo systemctl enable myapp
 
 # 4. 启动服务
 sudo systemctl start myapp
 
-# 5. 查看状态
+# 5. 查看服务状态
 sudo systemctl status myapp
+
+# 6. 查看服务日志
+sudo journalctl -u myapp -f
 ```
 
-## 📚 Rust 核心概念解析
+## 📄 生成的 Service 文件示例
 
-### 1. 所有权系统 (Ownership)
+```ini
+[Unit]
+Description=My Application
+After=network.target
 
-Rust 最独特的特性，在编译时保证内存安全，无需 GC：
+[Service]
+Type=simple
+User=myuser
+ExecStart=/usr/bin/myapp
+WorkingDirectory=/opt/myapp
+Restart=always
+RestartSec=5
 
-```rust
-// 值的所有权会转移
-let s1 = String::from("hello");
-let s2 = s1;  // s1 的所有权转移到 s2
-// println!("{}", s1);  // ❌ 编译错误！s1 已失效
-
-// 使用借用（引用）避免所有权转移
-let s1 = String::from("hello");
-let s2 = &s1;  // s2 借用 s1
-println!("{}, {}", s1, s2);  // ✅ 都可以使用
+[Install]
+WantedBy=multi-user.target
 ```
 
-**对比其他语言：**
-- **Python**: 一切都是引用，有 GC
-- **Go**: 有值类型和指针，有 GC
-- **Rust**: 通过所有权系统在编译时管理内存，零成本抽象
+## 🛠️ 开发
 
-### 2. 借用和引用 (Borrowing)
+```bash
+# 克隆仓库
+git clone https://github.com/Waitfish/systemd-generator.git
+cd systemd-generator
 
-```rust
-// 不可变借用（可以有多个）
-fn calculate_length(s: &String) -> usize {
-    s.len()  // 只读访问
-}
+# 编译
+cargo build
 
-// 可变借用（同时只能有一个）
-fn change(s: &mut String) {
-    s.push_str(" world");
-}
+# 运行测试
+cargo test
+
+# 运行
+cargo run -- --name test --exec /bin/bash
+
+# 构建 release 版本
+cargo build --release
 ```
 
-### 3. Option 和 Result
+## 📖 技术栈
 
-替代其他语言的 null/nil，强制处理错误：
+- **语言**: Rust
+- **依赖**: clap (命令行参数解析)
+- **最小 Rust 版本**: 1.70+
 
-```rust
-// Option: 可能有值或无值
-let maybe_number: Option<i32> = Some(5);
-match maybe_number {
-    Some(n) => println!("数字是: {}", n),
-    None => println!("没有值"),
-}
+## 🤝 贡献
 
-// Result: 成功或失败
-fn divide(a: i32, b: i32) -> Result<i32, String> {
-    if b == 0 {
-        Err("除数不能为零".to_string())
-    } else {
-        Ok(a / b)
-    }
-}
-```
+欢迎提交 Issue 和 Pull Request！
 
-### 4. 模式匹配 (Pattern Matching)
+## 📄 许可证
 
-比其他语言的 switch 更强大：
+本项目采用 MIT 许可证 - 查看 [LICENSE-MIT](LICENSE-MIT) 文件了解详情
 
-```rust
-match some_value {
-    Some(x) if x > 10 => println!("大于10: {}", x),
-    Some(x) => println!("其他值: {}", x),
-    None => println!("无值"),
-}
-```
+## 🔗 相关链接
 
-## 🎓 学习路径
+- [GitHub 仓库](https://github.com/Waitfish/systemd-generator)
+- [Issue 追踪](https://github.com/Waitfish/systemd-generator/issues)
+- [systemd 文档](https://www.freedesktop.org/software/systemd/man/systemd.service.html)
 
-这个项目涵盖了 Rust 的核心概念，建议学习顺序：
+---
 
-1. **阅读代码注释** - 每个概念都有详细说明
-2. **运行程序** - 实际体验工具的使用
-3. **修改代码** - 尝试添加新功能（见下方扩展建议）
-4. **处理编译错误** - Rust 编译器错误信息非常友好，是最好的老师
-
-## 🔧 扩展功能建议
-
-完成基础版本后，可以尝试添加：
-
-1. **交互式模式** - 不提供参数时进入问答模式
-2. **配置文件** - 从 JSON/TOML 读取配置
-3. **模板支持** - 支持自定义 service 模板
-4. **验证功能** - 验证生成的 service 文件语法
-5. **更多 systemd 选项** - 支持更多 systemd 配置项
-
-## 📖 参考资源
-
-- [Rust 官方书籍](https://doc.rust-lang.org/book/)（强烈推荐）
-- [Rust by Example](https://doc.rust-lang.org/rust-by-example/)
-- [systemd.service 手册](https://www.freedesktop.org/software/systemd/man/systemd.service.html)
-
-## 💡 小贴士
-
-- Rust 编译器的错误提示很详细，仔细阅读能学到很多
-- 使用 `cargo clippy` 获取代码改进建议
-- 使用 `cargo fmt` 自动格式化代码
-- 多写代码，让 Rust 编译器教你正确的用法
-
-祝学习愉快！🦀
-
+Made with ❤️ using Rust 🦀
