@@ -147,16 +147,31 @@ if check_version_exists "$CURRENT_VERSION"; then
     update_version "$NEW_VERSION"
     CURRENT_VERSION=$NEW_VERSION
     
+    # 立即提交版本更新
+    if [ -d ".git" ]; then
+        echo ""
+        echo "📝 提交版本更新到 Git..."
+        git add Cargo.toml
+        git commit -m "Bump version to $NEW_VERSION"
+        
+        read -p "是否推送到远程仓库？(Y/n) " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+            git push
+            echo "✅ 已推送到远程仓库"
+        fi
+    fi
+    
     echo ""
 fi
 
-# 检查 Git 状态
+# 再次检查 Git 状态（以防有其他未提交的更改）
 if [ -d ".git" ]; then
     if [ -n "$(git status --porcelain)" ]; then
-        echo "⚠️  警告: 有未提交的更改"
+        echo "⚠️  警告: 还有其他未提交的更改"
         git status --short
         echo ""
-        read -p "是否继续？(y/N) " -n 1 -r
+        read -p "是否继续发布？(y/N) " -n 1 -r
         echo
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
             exit 1
@@ -257,16 +272,8 @@ case $choice in
         echo "⏳ 等待 crates.io 索引更新（30秒）..."
         sleep 30
         
-        # 3. 提交版本更新
+        # 3. 创建 Git 标签（版本已经在前面提交过了）
         if [ -d ".git" ]; then
-            if [ -n "$(git status --porcelain Cargo.toml)" ]; then
-                echo "📝 提交版本更新..."
-                git add Cargo.toml Cargo.lock 2>/dev/null || git add Cargo.toml
-                git commit -m "Bump version to $CURRENT_VERSION"
-                git push
-            fi
-            
-            # 4. 创建 Git 标签
             TAG="v$CURRENT_VERSION"
             echo "🏷️  创建标签: $TAG"
             
