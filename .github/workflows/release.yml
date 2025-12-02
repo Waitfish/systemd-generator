@@ -12,79 +12,49 @@ jobs:
   build-and-release:
     name: Build and Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
-      
-      - name: Cache cargo registry
-        uses: actions/cache@v3
-        with:
-          path: ~/.cargo/registry
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-      
-      - name: Cache cargo index
-        uses: actions/cache@v3
-        with:
-          path: ~/.cargo/git
-          key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
-      
-      - name: Cache cargo build
-        uses: actions/cache@v3
-        with:
-          path: target
-          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+        uses: dtolnay/rust-toolchain@stable
       
       - name: Build release binary
-        run: cargo build --release --verbose
-      
-      - name: Strip binary
-        run: strip target/release/systemd-generator || true
-      
-      - name: Get version from tag
-        id: get_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        run: |
+          cargo build --release --verbose
+          strip target/release/systemd-generator || true
       
       - name: Create Release
-        id: create_release
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
+          files: target/release/systemd-generator
           body: |
-            # systemd-generator ${{ steps.get_version.outputs.VERSION }}
+            ## systemd-generator ${{ github.ref_name }}
             
-            ## 安装方式
+            快速生成 Linux systemd service 配置文件的命令行工具。
             
-            ### 方式 1: 下载二进制文件
+            ### 📦 安装
+            
+            下载二进制文件：
             ```bash
             wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/systemd-generator
             chmod +x systemd-generator
             sudo mv systemd-generator /usr/local/bin/
             ```
             
-            ### 方式 2: 使用 Cargo
+            或使用 Cargo 安装：
             ```bash
             cargo install systemd-generator
             ```
             
-            ## 使用示例
+            ### 🚀 使用
             ```bash
             systemd-generator --name myapp --exec /usr/bin/myapp
             ```
             
             更多信息请查看 [README](https://github.com/${{ github.repository }}#readme)
-          files: |
-            target/release/systemd-generator
           draft: false
           prerelease: false
-
